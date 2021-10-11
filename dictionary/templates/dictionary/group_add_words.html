@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form>
+        {% csrf_token %}
+    </form>
+    <div class="row">
+        <div class="column" id="group-tiles">
+            {% for word in words %}
+                <div class="tile">{{word.german}}</div>
+            {% endfor %}
+        </div>
+        <div class="column" id="other-tiles">
+            {% for word in other_words %}
+                <div class="tile" style="background: blue">{{word.german}}</div>
+            {% endfor %}
+        </div>
+        <div class="column">
+            <button id="save">Save</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block domready %}
+    let $gt = $("#group-tiles");
+    let $ot = $("#other-tiles");
+    let $col = $(".column");
+    let $tile = $(".tile")
+    $tile.draggable({
+        containment: $('#content'),
+        stop: function(event, ui){
+            $(this).css({'left': 0, 'top': 0});
+        }
+    });
+    $col.droppable({
+        drop: function(event, ui){
+            let $tile_col = ui.draggable.parent();
+            let $d_tile = ui.draggable
+            if ($tile_col.attr('id') !== $(this).attr('id')){
+                $d_tile.detach()
+                $d_tile.css({'left': 0, 'top': 0})
+                $(this).append($d_tile);
+            }
+        }
+    });
+    let CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+    $('#save').click(function(){
+        let words = [];
+        $('#group-tiles .tile').each(function(i){
+            words.push($(this).html());
+        });
+        $.post("{% url "group_add_words" group.pk %}",
+               {csrfmiddlewaretoken: CSRFtoken,
+                words: words})
+        window.location.href = "{% url "group_detail" group.pk %}";
+    });
+
+    let n = 8;
+    let total_other_words = {{ other_words|length }};
+    let n_dummy_tiles = n - (total_other_words % n);
+    for (let i = 0; i < n_dummy_tiles; i++){
+        $ot.append('<div class="tile" style="background: white">None</div>');
+    }
+    $ot.append('<p><button id="prev">Prev</button><button id="next">Next</button></p>');
+
+    $('#other-tiles .tile').each(function(i){
+        //words.push($(this).html());
+        $(this).css('display', 'block');
+        return i < n-1;
+    });
+    let cur_first = 0;
+    let cur_last = n;
+
+    $("#next").click(function(){
+        if (cur_last >= total_other_words){
+            return;
+        }
+        let $cur_first_tile = $("#other-tiles .tile").eq(cur_first);
+        let $cur_last_tile = $("#other-tiles .tile").eq(cur_last);
+        for (let i = 0; i < n; i++){
+            cur_first ++;
+            cur_last ++;
+            $cur_first_tile.css("display", "none");
+            $cur_last_tile.css("display", "block");
+            $cur_first_tile = $cur_first_tile.next();
+            $cur_last_tile = $cur_last_tile.next();
+        }
+    });
+    $("#prev").click(function(){
+        if (cur_first <= 0){
+            return;
+        }
+        let $cur_first_tile = $("#other-tiles .tile").eq(cur_first-1);
+        let $cur_last_tile = $("#other-tiles .tile").eq(cur_last-1);
+        for (let i = 0; i < n; i++){
+            cur_first --;
+            cur_last --;
+            $cur_first_tile.css("display", "block");
+            $cur_last_tile.css("display", "none");
+            $cur_first_tile = $cur_first_tile.prev();
+            $cur_last_tile = $cur_last_tile.prev();
+        }
+    });
+
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ object.name }}</h2>
+    <table>
+        <tr>
+            <th>№</th>
+            <th>German</th>
+            <th>English</th>
+            <th>Relevance</th>
+        </tr>
+        {% for word in object.words.all %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><a href="{% url "word_detail" word.pk %}">{{ word.article }} {{ word.german }}</a></td>
+                <td>{{ word.english }}</td>
+                <td>{{ word.relevance }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="{% url "practice_menu" object.pk %}"><button>Practice</button></a>
+    <a href="{% url "group_update" object.pk %}"><button style="background: purple">Update</button></a>
+    <a href="{% url "group_add_words" object.pk %}"><button style="background: blue">Add Words</button></a>
+{% endblock %}

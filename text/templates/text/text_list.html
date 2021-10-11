@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h2>Texts</h2>
+    {% for object in object_list %}
+        <p><a href="{% url "text_detail" object.pk %}">{{object.name}}</a></p>
+    {% endfor %}
+{% endblock %}
+

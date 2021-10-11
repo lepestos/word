@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Duden definitions for word: {{word}}</h2>
+    <ul>
+        {% for definition in definitions %}
+            <li>{{definition}}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

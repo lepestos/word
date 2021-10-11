@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <table>
+        <tr>
+            <th>№</th>
+            <th>Group</th>
+            <th>Words</th>
+        </tr>
+        {% for group in object_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><a href="{% url "group_detail" group.pk %}">{{group.name}}</a></td>
+                <td>
+                    {% for word in group.words.all %}
+                    <a href="{% url "word_detail" word.pk %}">{{ word.german }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

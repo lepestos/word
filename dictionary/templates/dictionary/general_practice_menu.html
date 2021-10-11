@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Practice Menu</h2>
+    <p><button id="ge">German into English</button></p>
+    <p><button id="eg">English into German</button></p>
+{% endblock %}
+
+{% block domready %}
+
+    $("#ge").click(function(){
+        window.location.href = "{% url "general_practice_eg" lp="ge" %}";
+    });
+    $("#eg").click(function(){
+        window.location.href = "{% url "general_practice_eg" lp="eg" %}";
+    });
+{% endblock %}

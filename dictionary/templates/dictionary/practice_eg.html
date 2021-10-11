@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form>
+        {% csrf_token %}
+    </form>
+    <div id="exercise">
+        <button id="start" class="box">Start</button>
+    </div>
+
+{% endblock %}
+
+{% block domready %}
+    let $ex = $('#exercise');
+    let target_words = {{target_words|safe}};
+    let source_words = {{source_words|safe}};
+    function start(){
+        $ex.html('<p id="question"></p>' +
+                 '<p><input type="text" id="answer" autocomplete="off"></p>' +
+                 '<a href="{{request.get_full_path}}"><div class="box">Restart</div></a>' +
+                 '<p><div class="box" id="hint-button" style="background: gray">Hint</div></p>' +
+                 '<p id="hint-text"></p>' +
+                 '{% if group %}' +
+                 '<p><a href="{% url "group_detail" group.pk %}">Go Back</a></p>' +
+                 '{% else %}' +
+                 '<p><a href="{% url "index" %}">Go Back</a></p>' +
+                 '{% endif %}');
+        let $ans = $('#answer');
+        let $hint_b = $('#hint-button');
+        let $hint_t = $('#hint-text');
+        n = target_words.length;
+        let correct = true
+        let count = 0;
+        let current_time = new Date().getTime();
+        //let audio = new Audio();
+        new_question(0);
+        $ans.focus();
+
+        function get_mm_source(word){
+            let str = word + '_British_English_pronunciation.mp3';
+            let url = 'https://www.macmillandictionary.com/media/british/uk_pron/';
+            url += str.slice(0,1) + '/';
+            url += str.slice(0,3) + '/';
+            url += str.slice(0,5) + '/';
+            url += str;
+            return url;
+        }
+
+
+        function new_question(i){
+            $('#question').html('Translate into {{language}}: ' + source_words[i] + '');
+            //let words = source_words[i].split(" ");
+            //if (words.length < 3){
+            //    let audio = new Audio(get_mm_source(words[words.length-1]));
+            //    audio.play();
+            //}
+        }
+
+        $ans.keyup(function(event){
+                if ($ans.val() === target_words[count]){
+                    $ans.val('');
+                    $hint_t.html('');
+                    time_delta = (new Date().getTime()-current_time)/1000;
+                    if ('{{language}}' == 'German'){
+                        send(target_words[count], correct, time_delta);
+                    }
+                    else{
+                        send(source_words[count], correct, time_delta);
+                    }
+                    count ++;
+                    correct = true
+                    current_time = new Date().getTime()
+                    if (count < n){
+                        new_question(count);
+                    }
+                    else {
+                        $('#question').html("That's it!");
+                        $ans.css("display", "none");
+                        $hint_b.css("display", "none");
+                    }
+                }
+            });
+
+        let CSRFtoken = $('input[name=csrfmiddlewaretoken]').val();
+        function send(word, correct, time_delta){
+            $.post("{{request.path}}",
+                   {csrfmiddlewaretoken: CSRFtoken,
+                    word: word,
+                    correct: correct,
+                    time_delta: time_delta})
+        }
+
+        $hint_b.click(function(){
+            $hint_t.html(target_words[count]);
+            correct = false
+        });
+    }
+
+    $('#start').click(function(){
+        start();
+    });
+    start();
+
+
+{% endblock %}

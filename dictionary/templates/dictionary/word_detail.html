@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ object.article }} <span id="word">{{ object.german }}</span><strong> {{ object.word_class }}</strong></h2>
+    {% if object.gender %}
+        <p>{{ object.gender }}</p>
+    {% endif %}
+    <p>English Translation: {{ object.english }}</p>
+    <p>Relevance Score: {{object.relevance}}</p>
+    <p>
+        Groups:
+        {% for group in object.groups.all %}
+            <a href="{% url "group_detail" group.pk %}">{{group.name}}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor%}
+    </p>
+    <br>
+    <a href="{% url "duden_definitions" object.pk %}">Show Definitions</a>
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" value="Remove">
+    </form>
+    <a href="{% url "word_update" object.pk %}"><input type="submit" value="Edit"></a>
+{% endblock %}

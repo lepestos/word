@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{group.name}}</h2>
+    <p><button id="ge">German into English</button></p>
+    <p><button id="eg">English into German</button></p>
+    <p>Range: <input id="from" type="number">-<input id="to" type="number"></p>
+{% endblock %}
+
+{% block domready %}
+    let $from = $('#from');
+    let $to = $('#to');
+    $from.val(1);
+    let total = {{group.words.all|length}};
+    $to.val(total);
+
+    $("#ge").click(function(){
+        window.location.href = "{% url "practice_eg" pk=group.pk lp="ge" %}?range=" + $from.val() + "-" + $to.val();
+    });
+    $("#eg").click(function(){
+        window.location.href = "{% url "practice_eg" pk=group.pk lp="eg" %}?range=" + $from.val() + "-" + $to.val();
+    });
+{% endblock %}
